@@ -2,7 +2,6 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const pool = require("./postgre");
-const e = require("express");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,6 +17,11 @@ const incorrect = {
   message: "Error en la solicitud.",
 };
 
+const errorToken = {
+  status: 401,
+  message: "Se requiere Token.",
+};
+
 const errorServer = {
   status: 500,
   message: "Ocurrió un error en el servidor.",
@@ -27,10 +31,13 @@ app.use(cors());
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.json({ message: "¡Hola, mundo!" });
+  res.json({
+    message: "Hello world from Perú 🇵🇪!",
+    developer: "API REST made for Jesus Piscoya 🧑‍💻",
+  });
 });
 
-app.post("/api/login", async (req, res) => {
+app.post("/api/login", async (req, res, next) => {
   const { email, password } = req.body;
 
   try {
@@ -54,26 +61,26 @@ app.post("/api/login", async (req, res) => {
       };
     });
 
-    if (user.rows.length > 0) {
-      res.status(200).json({ data: listUser, metadata: success });
-    } else {
-      res.status(400).json({ data: [], metadata: incorrect });
-    }
+    if (user.rows.length === 0)
+      return res
+        .status(400)
+        .json({ error: "Email or password incorrect", metadata: incorrect });
+
+    res.status(200).json({ data: listUser, metadata: success });
   } catch (error) {
-    res.status(500).json({ error: error, metadata: errorServer });
+    next(error);
   }
 });
 
-app.get("/api/channels", async (req, res) => {
+app.get("/api/channels", async (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
     const payload = jwt.verify(token, SECRET);
 
-    if (!token) return res.status(401).json({ error: "Token required." });
     if (Date.now() >= payload.exp)
-      return res.status(401).json({ error: "Token expired." });
+      next({ name: "JsonWebTokenError", message: "token expired" });
   } catch (error) {
-    return res.status(401).json({ error: error.message });
+    next(error);
   }
 
   try {
@@ -85,41 +92,50 @@ app.get("/api/channels", async (req, res) => {
         logo: channel.logo,
       };
     });
+
     res.status(200).json({ data: listChannels, metadata: success });
   } catch (error) {
-    res.status(500).json({ error: error, metadata: errorServer });
+    next(error);
   }
 });
 
-app.post("/api/channel", async (req, res) => {
-  const { id } = req.body;
-
+app.get("/api/channel/:id", async (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
     const payload = jwt.verify(token, SECRET);
 
-    if (!token) return res.status(401).json({ error: "Token required." });
     if (Date.now() >= payload.exp)
-      return res.status(401).json({ error: "Token expired." });
+      next({ name: "JsonWebTokenError", message: "token expired" });
   } catch (error) {
-    return res.status(401).json({ error: error.message });
+    next(error);
   }
 
   try {
     const channel = await pool.query("SELECT * FROM channels WHERE id = $1", [
-      id,
+      req.params.id,
     ]);
 
-    if (channel.rows.length > 0) {
-      res.status(200).json({ data: channel.rows, metadata: success });
-    } else {
-      res.status(404).json({ data: [], metadata: incorrect });
-    }
+    res.status(200).json({ data: channel.rows, metadata: success });
   } catch (error) {
-    res.status(500).json({ error: error, metadata: errorServer });
+    next(error);
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en el puerto ${PORT}`);
-});
+const unknownEndpoint = (req, res) => {
+  res.status(404).send({ error: "Not found endpoint" });
+};
+
+const errorHandler = (error, req, res, next) => {
+  if (error.routine === "pg_strtoint64") {
+    return res.status(400).json({ error: error.message, metadata: incorrect });
+  } else if (error.name === "JsonWebTokenError") {
+    return res.status(401).json({ error: error.message, metadata: errorToken });
+  }
+
+  return res.status(500).json({ error: error.message, metadata: errorServer });
+};
+
+app.use(unknownEndpoint);
+app.use(errorHandler);
+
+app.listen(PORT);
