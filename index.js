@@ -1,10 +1,10 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
-const pool = require("./postgre");
+const mysql = require("./mysql");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 const SECRET = process.env.SECRET_KEY;
 
 const success = {
@@ -41,30 +41,31 @@ app.post("/api/login", async (req, res, next) => {
   const { email, password } = req.body;
 
   try {
-    const user = await pool.query(
-      "SELECT * FROM users WHERE email = $1 AND password = $2",
+    const [user] = await mysql.query(
+      "SELECT * FROM users WHERE email = ? AND password = ?",
       [email, password]
     );
+
     const token = jwt.sign(
       { email: email, exp: Date.now() + 12 * 60 * 60 * 1000 },
       SECRET
     );
 
-    const listUser = user.rows.map((user) => {
+    if (user.length === 0)
+      return res
+        .status(400)
+        .json({ error: "Email or password incorrect", metadata: incorrect });
+
+    const listUser = user.map((user) => {
       return {
         id: user.id,
         firstname: user.firstname,
         lastname: user.lastname,
         email: user.email,
-        status: user.status,
+        state: user.state,
         token: token,
       };
     });
-
-    if (user.rows.length === 0)
-      return res
-        .status(400)
-        .json({ error: "Email or password incorrect", metadata: incorrect });
 
     res.status(200).json({ data: listUser, metadata: success });
   } catch (error) {
@@ -84,8 +85,10 @@ app.get("/api/channels", async (req, res, next) => {
   }
 
   try {
-    const channels = await pool.query("SELECT * FROM channels");
-    const listChannels = channels.rows.map((channel) => {
+    const [channels] = await mysql.query(
+      "SELECT * FROM channels ORDER BY created_at ASC"
+    );
+    const listChannels = channels.map((channel) => {
       return {
         id: channel.id,
         name: channel.name,
@@ -111,11 +114,11 @@ app.get("/api/channel/:id", async (req, res, next) => {
   }
 
   try {
-    const channel = await pool.query("SELECT * FROM channels WHERE id = $1", [
+    const [channel] = await mysql.query("SELECT * FROM channels WHERE id = ?", [
       req.params.id,
     ]);
 
-    res.status(200).json({ data: channel.rows, metadata: success });
+    res.status(200).json({ data: channel, metadata: success });
   } catch (error) {
     next(error);
   }

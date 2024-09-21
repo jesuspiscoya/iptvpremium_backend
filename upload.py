@@ -1,6 +1,10 @@
+import os
 import re
-import psycopg2
-from psycopg2 import OperationalError
+import mysql.connector as mysql
+from mysql.connector import Error
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def parse_m3u_file(file_path):
@@ -26,9 +30,9 @@ def parse_m3u_file(file_path):
                 if i + 1 < len(lines):
                     url = lines[i + 1].strip()
                     channels.append({
-                        'tvg-id': tvg_id,
-                        'tvg-name': tvg_name,
-                        'tvg-logo': tvg_logo,
+                        'id': tvg_id,
+                        'name': tvg_name,
+                        'logo': tvg_logo,
                         'url': url
                     })
 
@@ -38,12 +42,12 @@ def parse_m3u_file(file_path):
 def insert_channels(channels):
     for channel in channels:
         try:
-            conn = psycopg2.connect(
-                dbname="postgres",
-                user="postgres.chuybyigpezlravbgpkd",
-                password="dPFmUmuKs0fWuy0Z",
-                host="aws-0-sa-east-1.pooler.supabase.com",
-                port="5432"
+            conn = mysql.connect(
+                host=os.getenv("DB_HOST"),
+                user=os.getenv("DB_USER"),
+                password=os.getenv("DB_PASSWORD"),
+                database=os.getenv("DB_NAME"),
+                port=os.getenv("DB_PORT")
             )
             cur = conn.cursor()
 
@@ -52,16 +56,16 @@ def insert_channels(channels):
                 VALUES (%s, %s, %s, %s)
             """
             variables = (
-                channel['tvg-id'],
-                channel['tvg-name'],
-                channel['tvg-logo'],
+                channel['id'],
+                channel['name'],
+                channel['logo'],
                 channel['url']
             )
             cur.execute(SQL, variables)
             # Confirmar los cambios
             conn.commit()
             print("Datos insertados correctamente.")
-        except OperationalError as e:
+        except Error as e:
             print(f"Error al conectar a la base de datos: {e}")
         finally:
             if cur is not None:
@@ -70,11 +74,8 @@ def insert_channels(channels):
                 conn.close()
 
 
-# Ruta al archivo .m3u
-file_path = 'jesus.m3u'
-
 # Parsear el archivo
-channels = parse_m3u_file(file_path)
+channels = parse_m3u_file('jesus.m3u')
 
 # Imprimir los resultados
 insert_channels(channels)
