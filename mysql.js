@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const mysql = require("mysql2");
 
-const caCert = fs.readFileSync(path.join(__dirname, "certs", "cert.pem"));
+const caCert = fs.readFileSync(path.join(__dirname, "certs/ca-cert.pem"));
 
 // Crear la conexión a la base de datos
 const pool = mysql.createPool({

@@ -2,6 +2,7 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const mysql = require("./mysql");
+const serverless = require("serverless-http");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -141,4 +142,5 @@ const errorHandler = (error, req, res, next) => {
 app.use(unknownEndpoint);
 app.use(errorHandler);
 
-app.listen(PORT);
+// app.listen(PORT);
+module.exports.handler = serverless(app);
