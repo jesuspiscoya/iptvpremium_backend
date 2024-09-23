@@ -1,7 +1,8 @@
 [build]
-  functions = "."
+  functions = "functions"
 
 [[redirects]]
-  from = "/"
+  from = "/*"
   to = "/.netlify/functions/index"
   status = 200
+  force = true

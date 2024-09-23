@@ -1,10 +1,6 @@
 require("dotenv").config();
 
-const fs = require("fs");
-const path = require("path");
 const mysql = require("mysql2");
-
-const caCert = fs.readFileSync(path.join(__dirname, "certs/ca-cert.pem"));
 
 // Crear la conexión a la base de datos
 const pool = mysql.createPool({
@@ -13,7 +9,7 @@ const pool = mysql.createPool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   port: process.env.DB_PORT,
-  ssl: { ca: caCert },
+  ssl: { ca: process.env.DB_CERT },
 }).promise();
 
 module.exports = pool;
