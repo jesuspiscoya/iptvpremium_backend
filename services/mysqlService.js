@@ -11,7 +11,7 @@ class MysqlService {
         password: process.env.DB_PASSWORD,
         database: process.env.DB_NAME,
         port: process.env.DB_PORT,
-        ssl: { ca: process.env.DB_CERTS },
+        ssl: { ca: process.env.DB_CERT },
       })
       .promise();
   }
