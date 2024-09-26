@@ -5,6 +5,7 @@ const ChannelService = require("../services/channelService");
 const EpgService = require("../services/epgService");
 const LoginService = require("../services/loginService");
 const fs = require("fs").promises;
+const path = require("path");
 const xml2js = require("xml2js");
 const serverless = require("serverless-http");
 
@@ -14,6 +15,9 @@ const SECRET = process.env.SECRET_KEY;
 
 app.use(cors());
 app.use(express.json());
+
+// Mostrar archivos estáticos desde la carpeta 'dist'
+app.use(express.static("dist"));
 
 const success = {
   status: 200,
@@ -106,9 +110,10 @@ app.get("/api/playlist", async (req, res, next) => {
 
 app.get("/api/epg", async (req, res, next) => {
   try {
-    const fileXml = await fs.readFile("epg.xml", "utf-8");
+    const pathFile = path.join(__dirname, "../dist", "epg.xml");
+    const readFile = await fs.readFile(pathFile, "utf-8");
     res.type("application/xml");
-    res.status(200).send(fileXml);
+    res.status(200).send(readFile);
   } catch (error) {
     next(error);
   }
@@ -116,19 +121,20 @@ app.get("/api/epg", async (req, res, next) => {
 
 app.get("/api/epg/update", async (req, res, next) => {
   try {
-    const fileXml = await fs.readFile("epg.xml", "utf-8");
+    const pathFile = path.join(__dirname, "../dist", "epg.xml");
+    const readFile = await fs.readFile(pathFile, "utf-8");
     // const data = fileXml.replace(/&(?!amp;|lt;|gt;|quot;|apos;)/g, "&amp;");
-    const result = await xml2js.parseStringPromise(fileXml);
+    const result = await xml2js.parseStringPromise(readFile);
 
     // Obtener guía EPG en XML
     const epgXml = await new EpgService().getEpgXml(result);
 
     // Convertir de nuevo a XML y guardar
     const xml = new xml2js.Builder().buildObject(epgXml);
-    await fs.writeFile("epg.xml", xml);
+    await fs.writeFile(pathFile, xml);
 
     res.status(200).json({
-      messaje: "Se actualizó la guía EPG con éxito!",
+      messaje: "Guía EPG actualizada con éxito!",
       metadata: success,
     });
   } catch (error) {
@@ -136,16 +142,15 @@ app.get("/api/epg/update", async (req, res, next) => {
   }
 });
 
-app.get("/api/proxy", async (req, res, next) => {
+app.get("/api/player", async (req, res, next) => {
   try {
     const response = await fetch(req.query.url);
     const data = await response.text();
-    res.set({
-      "Content-Type": "application/x-mpegURL",
-      "Content-Disposition": "filename=index",
-    });
-    res.type("application/x-mpegURL");
-    res.status(200).send(data);
+
+    const pathFile = path.join(__dirname, "../dist", "index.m3u8");
+    await fs.writeFile(pathFile, data);
+
+    res.status(200).json({ data: "Player actualizado con éxito!", metadata: success });
   } catch (error) {
     next(error);
   }
