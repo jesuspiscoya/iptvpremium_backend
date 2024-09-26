@@ -1,12 +1,19 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
-const mysql = require("../mysql");
+const ChannelService = require("../services/channelService");
+const EpgService = require("../services/epgService");
+const LoginService = require("../services/loginService");
+const fs = require("fs").promises;
+const xml2js = require("xml2js");
 const serverless = require("serverless-http");
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 const SECRET = process.env.SECRET_KEY;
+
+app.use(cors());
+app.use(express.json());
 
 const success = {
   status: 200,
@@ -28,9 +35,6 @@ const errorServer = {
   message: "Ocurrió un error en el servidor.",
 };
 
-app.use(cors());
-app.use(express.json());
-
 app.get("/", (req, res) => {
   res.json({
     message: "Hello world from Perú 🇵🇪!",
@@ -39,36 +43,9 @@ app.get("/", (req, res) => {
 });
 
 app.post("/api/login", async (req, res, next) => {
-  const { email, password } = req.body;
-
   try {
-    const [user] = await mysql.query(
-      "SELECT * FROM users WHERE email = ? AND password = ?",
-      [email, password]
-    );
-
-    const token = jwt.sign(
-      { email: email, exp: Date.now() + 12 * 60 * 60 * 1000 },
-      SECRET
-    );
-
-    if (user.length === 0)
-      return res
-        .status(400)
-        .json({ error: "Email or password incorrect", metadata: incorrect });
-
-    const listUser = user.map((user) => {
-      return {
-        id: user.id,
-        firstname: user.firstname,
-        lastname: user.lastname,
-        email: user.email,
-        state: user.state,
-        token: token,
-      };
-    });
-
-    res.status(200).json({ data: listUser, metadata: success });
+    const user = await new LoginService().login(req.body);
+    res.status(200).json({ data: user, metadata: success });
   } catch (error) {
     next(error);
   }
@@ -86,18 +63,8 @@ app.get("/api/channels", async (req, res, next) => {
   }
 
   try {
-    const [channels] = await mysql.query(
-      "SELECT * FROM channels ORDER BY created_at ASC"
-    );
-    const listChannels = channels.map((channel) => {
-      return {
-        id: channel.id,
-        name: channel.name,
-        logo: channel.logo,
-      };
-    });
-
-    res.status(200).json({ data: listChannels, metadata: success });
+    const channels = await new ChannelService().getChannels();
+    res.status(200).json({ data: channels, metadata: success });
   } catch (error) {
     next(error);
   }
@@ -115,11 +82,55 @@ app.get("/api/channel/:id", async (req, res, next) => {
   }
 
   try {
-    const [channel] = await mysql.query("SELECT * FROM channels WHERE id = ?", [
-      req.params.id,
-    ]);
-
+    const channel = await new ChannelService().getChannel(req.params.id);
     res.status(200).json({ data: channel, metadata: success });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/playlist", async (req, res, next) => {
+  try {
+    const playlist = await new ChannelService().getPlaylist();
+
+    res.type("application/x-mpegURL");
+    res.set({
+      "Content-Type": "application/x-mpegURL",
+      "Content-Disposition": "filename=playlist.m3u",
+    });
+    res.send(playlist);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/epg", async (req, res, next) => {
+  try {
+    const fileXml = await fs.readFile("epg.xml", "utf-8");
+    res.type("application/xml");
+    res.status(200).send(fileXml);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/epg/update", async (req, res, next) => {
+  try {
+    const fileXml = await fs.readFile("epg.xml", "utf-8");
+    // const data = fileXml.replace(/&(?!amp;|lt;|gt;|quot;|apos;)/g, "&amp;");
+    const result = await xml2js.parseStringPromise(fileXml);
+
+    // Obtener guía EPG en XML
+    const epgXml = await new EpgService().getEpgXml(result);
+
+    // Convertir de nuevo a XML y guardar
+    const xml = new xml2js.Builder().buildObject(epgXml);
+    await fs.writeFile("epg.xml", xml);
+
+    res.status(200).json({
+      messaje: "Se actualizó la guía EPG con éxito!",
+      metadata: success,
+    });
   } catch (error) {
     next(error);
   }
@@ -130,7 +141,7 @@ const unknownEndpoint = (req, res) => {
 };
 
 const errorHandler = (error, req, res, next) => {
-  if (error.routine === "pg_strtoint64") {
+  if (error.name === "TypeError") {
     return res.status(400).json({ error: error.message, metadata: incorrect });
   } else if (error.name === "JsonWebTokenError") {
     return res.status(401).json({ error: error.message, metadata: errorToken });
