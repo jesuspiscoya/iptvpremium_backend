@@ -136,6 +136,21 @@ app.get("/api/epg/update", async (req, res, next) => {
   }
 });
 
+app.get("/api/proxy", async (req, res, next) => {
+  try {
+    const response = await fetch(req.query.url);
+    const data = await response.text();
+    res.set({
+      "Content-Type": "application/x-mpegURL",
+      "Content-Disposition": "filename=index",
+    });
+    res.type("application/x-mpegURL");
+    res.status(200).send(data);
+  } catch (error) {
+    next(error);
+  }
+});
+
 const unknownEndpoint = (req, res) => {
   res.status(404).send({ error: "Not found endpoint" });
 };
