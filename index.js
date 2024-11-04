@@ -174,6 +174,3 @@ app.use(unknownEndpoint);
 app.use(errorHandler);
 
 app.listen(PORT);
-// module.exports.handler = serverless(app);
-
-// to = "/.netlify/functions/index/:splat"
