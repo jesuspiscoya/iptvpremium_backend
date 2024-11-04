@@ -2,11 +2,10 @@
   "name": "iptv-backend",
   "version": "1.0.1",
   "description": "Backend para web IptvPremiun",
-  "main": "functions/index.js",
+  "main": "index.js",
   "scripts": {
-    "start": "node functions/index.js",
-    "dev": "nodemon functions/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
   "author": "Jesus Piscoya",
   "license": "MIT",
