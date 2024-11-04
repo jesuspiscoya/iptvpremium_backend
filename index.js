@@ -1,9 +1,9 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
-const ChannelService = require("../services/channelService");
-const EpgService = require("../services/epgService");
-const LoginService = require("../services/loginService");
+const ChannelService = require("./services/channelService");
+const EpgService = require("./services/epgService");
+const LoginService = require("./services/loginService");
 const fs = require("fs").promises;
 const path = require("path");
 const xml2js = require("xml2js");
@@ -110,7 +110,7 @@ app.get("/api/playlist", async (req, res, next) => {
 
 app.get("/api/epg", async (req, res, next) => {
   try {
-    const pathFile = path.join(__dirname, "../dist", "epg.xml");
+    const pathFile = path.join(__dirname, "./dist", "epg.xml");
     const readFile = await fs.readFile(pathFile, "utf-8");
     res.type("application/xml");
     res.status(200).send(readFile);
@@ -121,7 +121,7 @@ app.get("/api/epg", async (req, res, next) => {
 
 app.get("/api/epg/update", async (req, res, next) => {
   try {
-    const pathFile = path.join(__dirname, "../dist", "epg.xml");
+    const pathFile = path.join(__dirname, "./dist", "epg.xml");
     const readFile = await fs.readFile(pathFile, "utf-8");
     // const data = fileXml.replace(/&(?!amp;|lt;|gt;|quot;|apos;)/g, "&amp;");
     const result = await xml2js.parseStringPromise(readFile);
@@ -147,7 +147,7 @@ app.get("/api/player", async (req, res, next) => {
     const response = await fetch(req.query.url);
     const data = await response.text();
 
-    const pathFile = path.join(__dirname, "../dist", "index.m3u8");
+    const pathFile = path.join(__dirname, "./dist", "index.m3u8");
     await fs.writeFile(pathFile, data);
 
     res.status(200).json({ data: "Player actualizado con éxito!", metadata: success });
