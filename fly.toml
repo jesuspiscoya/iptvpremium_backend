@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for iptvpremium-backend on 2024-11-04T23:16:16-05:00
+# fly.toml app configuration file generated for tvpe on 2024-11-05T00:47:26-05:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'iptvpremium-backend'
+app = 'tvpe'
 primary_region = 'bog'
 
 [build]
