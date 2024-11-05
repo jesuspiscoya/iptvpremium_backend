@@ -244,71 +244,70 @@ class EpgService {
     return programming;
   };
 
-  getEpgXml = async (result) => {
+  getEpgXml = async () => {
+    let xmlTv = {
+      tv: {
+        $: {
+          generator_info_name: "Jesus Piscoya Dev",
+          generator_info_url: "https://jesuspiscoya.online",
+        },
+      },
+    };
+    let xmlChannel = [];
+    let xmlProgramme = [];
     const channels = await this.channelService.getChannels();
 
-    // Limpiar canales existentes
-    result.tv.channel = [];
-
     // Agregar canales
-    if (result.tv.channel) {
-      let chan_id = "";
-      channels.map((channel) => {
-        if (chan_id !== channel.channel_id) {
-          result.tv.channel.push({
-            $: { id: channel.channel_id },
-            "display-name": {
-              $: { lang: "es" },
-              _: channel.name.replace(/ SD| HD| FHD/g, ""),
-            },
-            icon: {
-              $: { src: channel.logo },
-            },
-          });
-        }
-        chan_id = channel.channel_id;
+    channels.map((channel) => {
+      xmlChannel.push({
+        $: { id: channel.channel_id },
+        "display-name": {
+          $: { lang: "es" },
+          _: channel.name.replace(/ SD| HD| FHD/g, ""),
+        },
+        icon: {
+          $: { src: channel.logo },
+        },
       });
-    }
+    });
 
     const programming = await this.#getProgramming();
 
-    // Limpiar programas existentes
-    result.tv.programme = [];
-
     // Agregar programas
-    if (result.tv.programme) {
-      programming.map((program) => {
-        if (!program.start || !program.stop) {
-          console.log(program);
-        }
-        result.tv.programme.push({
-          $: {
-            start: new Date(program.start)
-              .toISOString()
-              .replace(/[^0-9]/g, "")
-              .slice(0, -3),
-            stop: new Date(program.stop)
-              .toISOString()
-              .replace(/[^0-9]/g, "")
-              .slice(0, -3),
-            channel: program.id,
-          },
-          title: {
-            $: { lang: "es" },
-            _: program.title,
-          },
-          desc: {
-            $: { lang: "es" },
-            _: program.description,
-          },
-          icon: {
-            $: { src: program.image },
-          },
-        });
+    programming.map((program) => {
+      if (!program.start || !program.stop) {
+        console.log(program);
+      }
+      xmlProgramme.push({
+        $: {
+          start: new Date(program.start)
+            .toISOString()
+            .replace(/[^0-9]/g, "")
+            .slice(0, -3),
+          stop: new Date(program.stop)
+            .toISOString()
+            .replace(/[^0-9]/g, "")
+            .slice(0, -3),
+          channel: program.id,
+        },
+        title: {
+          $: { lang: "es" },
+          _: program.title,
+        },
+        desc: {
+          $: { lang: "es" },
+          _: program.description,
+        },
+        icon: {
+          $: { src: program.image },
+        },
       });
-    }
+    });
 
-    return result;
+    xmlTv.tv.channel = xmlChannel;
+    xmlTv.tv.programme = xmlProgramme;
+
+    return xmlTv;
   };
 }
 

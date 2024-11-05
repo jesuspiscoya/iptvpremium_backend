@@ -121,14 +121,11 @@ app.get("/api/epg", async (req, res, next) => {
 app.get("/api/epg/update", async (req, res, next) => {
   try {
     const pathFile = path.join(__dirname, "../dist", "epg.xml");
-    const readFile = await fs.readFile(pathFile, "utf-8");
-    // const data = fileXml.replace(/&(?!amp;|lt;|gt;|quot;|apos;)/g, "&amp;");
-    const result = await xml2js.parseStringPromise(readFile);
 
     // Obtener guía EPG en XML
-    const epgXml = await new EpgService().getEpgXml(result);
+    const epgXml = await new EpgService().getEpgXml();
 
-    // Convertir de nuevo a XML y guardar
+    // Crear un nuevo XML y guardar archivo
     const xml = new xml2js.Builder().buildObject(epgXml);
     await fs.writeFile(pathFile, xml);
 
@@ -136,20 +133,6 @@ app.get("/api/epg/update", async (req, res, next) => {
       messaje: "Guía EPG actualizada con éxito!",
       metadata: success,
     });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.get("/api/player", async (req, res, next) => {
-  try {
-    const response = await fetch(req.query.url);
-    const data = await response.text();
-
-    const pathFile = path.join(__dirname, "../dist", "index.m3u8");
-    await fs.writeFile(pathFile, data);
-
-    res.status(200).json({ data: "Player actualizado con éxito!", metadata: success });
   } catch (error) {
     next(error);
   }
