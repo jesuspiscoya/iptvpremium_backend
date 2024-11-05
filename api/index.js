@@ -7,7 +7,6 @@ const LoginService = require("../services/loginService");
 const fs = require("fs").promises;
 const path = require("path");
 const xml2js = require("xml2js");
-const serverless = require("serverless-http");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
