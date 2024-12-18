@@ -7,7 +7,7 @@ class EpgService {
     this.timeNow = new Date();
     this.timeNow.setHours(0, 0, 0, 0);
     this.timeStart = this.timeNow / 1000;
-    this.timeEnd = this.timeNow.setDate(this.timeNow.getDate() + 5) / 1000;
+    this.timeEnd = this.timeNow.setDate(this.timeNow.getDate() + 3) / 1000;
     this.timeNow.setDate(this.timeNow.getDate() - 5);
   }
 
