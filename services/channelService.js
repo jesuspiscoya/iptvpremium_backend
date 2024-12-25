@@ -23,7 +23,7 @@ class ChannelService {
 
   getChannels = async () => {
     const [channels] = await this.mysql.query(
-      "SELECT * FROM channels ORDER BY created_at ASC"
+      "SELECT * FROM channels ORDER BY id"
     );
 
     return channels.map((channel) => {
@@ -39,7 +39,7 @@ class ChannelService {
 
   getPlaylist = async () => {
     const [channels] = await this.mysql.query(
-      "SELECT * FROM channels ORDER BY created_at ASC"
+      "SELECT * FROM channels ORDER BY id"
     );
 
     const header = "#EXTM3U\n";
