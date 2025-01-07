@@ -51,6 +51,13 @@ class ChannelService {
 
     return header + body;
   };
+
+  getChannelsEpg = async () => {
+    const [channels] = await this.mysql.query(
+      "SELECT * FROM channels GROUP BY channel_id ORDER BY id"
+    );
+    return channels;
+  };
 }
 
 module.exports = ChannelService;

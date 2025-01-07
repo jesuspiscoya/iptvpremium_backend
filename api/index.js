@@ -4,9 +4,6 @@ const cors = require("cors");
 const ChannelService = require("../services/channelService");
 const EpgService = require("../services/epgService");
 const LoginService = require("../services/loginService");
-const fs = require("fs").promises;
-const path = require("path");
-const xml2js = require("xml2js");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,9 +11,6 @@ const SECRET = process.env.SECRET_KEY;
 
 app.use(cors());
 app.use(express.json());
-
-// Mostrar archivos estáticos desde la carpeta 'dist'
-app.use(express.static("dist"));
 
 const success = {
   status: 200,
@@ -109,10 +103,9 @@ app.get("/api/playlist", async (req, res, next) => {
 
 app.get("/api/epg", async (req, res, next) => {
   try {
-    const pathFile = path.join(__dirname, "../dist", "epg.xml");
-    const readFile = await fs.readFile(pathFile, "utf-8");
+    const epg = await new EpgService().getEpg();
     res.type("application/xml");
-    res.status(200).send(readFile);
+    res.status(200).send(epg);
   } catch (error) {
     next(error);
   }
@@ -120,19 +113,8 @@ app.get("/api/epg", async (req, res, next) => {
 
 app.get("/api/epg/update", async (req, res, next) => {
   try {
-    const pathFile = path.join(__dirname, "../dist", "epg.xml");
-
-    // Obtener guía EPG en XML
-    const epgXml = await new EpgService().getEpgXml();
-
-    // Crear un nuevo XML y guardar archivo
-    const xml = new xml2js.Builder().buildObject(epgXml);
-    await fs.writeFile(pathFile, xml);
-
-    res.status(200).json({
-      messaje: "Guía EPG actualizada con éxito!",
-      metadata: success,
-    });
+    const data = await new EpgService().updateEpg();
+    res.status(200).json({ messaje: data, metadata: success });
   } catch (error) {
     next(error);
   }

@@ -1,9 +1,12 @@
 const ChannelService = require("./channelService");
+const MysqlService = require("./mysqlService");
 const cheerio = require("cheerio");
+const xml2js = require("xml2js");
 
 class EpgService {
   constructor() {
     this.channelService = new ChannelService();
+    this.mysql = new MysqlService().getConnection();
     this.timeNow = new Date();
     this.timeNow.setHours(0, 0, 0, 0);
     this.timeStart = this.timeNow / 1000;
@@ -249,7 +252,7 @@ class EpgService {
     return programming;
   };
 
-  getEpgXml = async () => {
+  getEpg = async () => {
     let xmlTv = {
       tv: {
         $: {
@@ -260,7 +263,11 @@ class EpgService {
     };
     let xmlChannel = [];
     let xmlProgramme = [];
-    const channels = await this.channelService.getChannels();
+
+    const channels = await this.channelService.getChannelsEpg();
+    const [programming] = await this.mysql.query(
+      "SELECT * FROM programming order by id"
+    );
 
     // Agregar canales
     channels.map((channel) => {
@@ -276,11 +283,9 @@ class EpgService {
       });
     });
 
-    const programming = await this.#getProgramming();
-
     // Agregar programas
     programming.map((program) => {
-      if (!program.start || !program.stop) {
+      if (!program.start || !program.end) {
         console.log(program);
       }
       xmlProgramme.push({
@@ -289,11 +294,11 @@ class EpgService {
             .toISOString()
             .replace(/[^0-9]/g, "")
             .slice(0, -3),
-          stop: new Date(program.stop)
+          stop: new Date(program.end)
             .toISOString()
             .replace(/[^0-9]/g, "")
             .slice(0, -3),
-          channel: program.id,
+          channel: program.channel_id,
         },
         title: {
           $: { lang: "es" },
@@ -312,7 +317,24 @@ class EpgService {
     xmlTv.tv.channel = xmlChannel;
     xmlTv.tv.programme = xmlProgramme;
 
-    return xmlTv;
+    return new xml2js.Builder().buildObject(xmlTv);
+  };
+
+  updateEpg = async () => {
+    await this.mysql.query("DELETE FROM programming");
+
+    const programming = await this.#getProgramming();
+
+    console.log(programming.length);
+
+    // Agregar programas
+    programming.forEach(async (element) => {
+      const sql =
+        "INSERT INTO programming (channel_id, start, end, title, description, image) VALUES (?, ?, ?, ?, ?, ?)";
+      this.mysql.query(sql, Object.values(element));
+    });
+
+    return "Guía EPG actualizada con éxito!";
   };
 }
 
