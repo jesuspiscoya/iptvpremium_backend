@@ -324,15 +324,14 @@ class EpgService {
     await this.mysql.query("DELETE FROM programming");
 
     const programming = await this.#getProgramming();
+    const valores = programming.map((element) => Object.values(element));
+    const sql =
+      "INSERT INTO programming (channel_id, start, end, title, description, image) VALUES ?";
 
-    console.log(programming.length);
+    console.log(valores.length);
 
-    // Agregar programas
-    programming.forEach(async (element) => {
-      const sql =
-        "INSERT INTO programming (channel_id, start, end, title, description, image) VALUES (?, ?, ?, ?, ?, ?)";
-      this.mysql.query(sql, Object.values(element));
-    });
+    // Insertar programas
+    this.mysql.query(sql, [valores]);
 
     return "Guía EPG actualizada con éxito!";
   };
