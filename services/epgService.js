@@ -8,10 +8,10 @@ class EpgService {
     this.channelService = new ChannelService();
     this.mysql = new MysqlService().getConnection();
     this.timeNow = new Date();
-    this.timeNow.setHours(0, 0, 0, 0);
-    this.timeStart = this.timeNow / 1000;
+    this.timeNow.setUTCHours(this.timeNow.getUTCHours() - 5, 0, 0, 0);
+    this.timeStart = this.timeNow.setUTCHours(0) / 1000;
     this.timeEnd = this.timeNow.setDate(this.timeNow.getDate() + 3) / 1000;
-    this.timeNow.setDate(this.timeNow.getDate() - 5);
+    this.timeNow.setDate(this.timeNow.getDate() - 3);
   }
 
   // FUNCIÓN PARA OBTENER LA PROGRAMACIÓN DE CANALES DE MOVISTAR
@@ -158,14 +158,9 @@ class EpgService {
 
   #getProgramming = async () => {
     const programming = [];
-    const timeBefore =
-      new Date(this.timeNow.setHours(this.timeNow.getHours() - 5))
-        .toJSON()
-        .slice(0, -5) + "Z";
-    const timeAfter =
-      new Date(this.timeNow.setDate(this.timeNow.getDate() + 5))
-        .toJSON()
-        .slice(0, -5) + "Z";
+    const timeBefore = this.timeNow.toJSON().slice(0, -5) + "Z";
+    this.timeNow.setUTCDate(this.timeNow.getUTCDate() + 3);
+    const timeAfter = this.timeNow.toJSON().slice(0, -5) + "Z";
 
     // API GUIA DE PROGRAMACION MOVISTAR PERU
     await this.#fetchProgrammingMovistar(
@@ -238,13 +233,6 @@ class EpgService {
         "zoomoo",
         dateFormat,
         "3271",
-        programming
-      );
-      await this.#fetchProgrammingMiTv(
-        "co",
-        "fox-news-internacional",
-        dateFormat,
-        "5780",
         programming
       );
     }
