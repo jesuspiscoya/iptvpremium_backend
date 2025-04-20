@@ -319,7 +319,7 @@ class EpgService {
     console.log(valores.length);
 
     // Insertar programas
-    this.mysql.query(sql, [valores]);
+    await this.mysql.query(sql, [valores]);
 
     return "Guía EPG actualizada con éxito!";
   };
