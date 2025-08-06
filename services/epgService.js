@@ -164,25 +164,25 @@ class EpgService {
 
     // API GUIA DE PROGRAMACION MOVISTAR PERU
     await this.#fetchProgrammingMovistar(
-      `https://contentapi-pe.cdn.telefonica.com/28/default/es-PE/schedules?fields=Title,Description,ChannelName,CallLetter,Start,End,LiveChannelPid,images.videoFrame,images.banner&orderBy=START_TIME:a&filteravailability=false&starttime=${this.timeStart}&endtime=${this.timeEnd}&livechannelpids=lch2201,lch2202,lch2203,lch2205,lch3451,lch2204,lch2318,lch2219,lch2459,lch5595,lch2215,lch2319,lch3298,lch3297,lch6517,lch6518,lch5701,lch6295,lch6559,lch5623,lch2375,lch2238,lch2247,lch5593,lch2303,lch2304,lch2770,lch2382,lch2328,lch2775,lch3952,lch2776,lch2813,lch2339,lch2341,lch2340,lch2342,lch2225,lch2227,lch2325,lch2228,lch6490,lch6491,lch6492,lch6496,lch6493,lch6494,lch6495,lch2333,lch2424,lch2796,lch2229,lch2322,lch2335,lch2336,lch2189,lch2224,lch6489,lch5602,lch2344,lch2273,lch2275,lch2343,lch2353,lch2327,lch2354,lch2278,lch2277,lch5703,lch3091,lch3489,lch2269,lch2359,lch2314,lch6620,lch6298,lch2285,lch2291,lch2287,lch7115,lch2491,lch2357,lch2188,lch2358,lch5625,lch6313`,
+      `https://contentapi-pe.cdn.telefonica.com/28/default/es-PE/schedules?fields=Title,Description,ChannelName,Start,End,LiveChannelPid,images.videoFrame&filteravailability=false&starttime=${this.timeStart}&endtime=${this.timeEnd}&livechannelpids=lch2201,lch2202,lch2203,lch2205,lch3451,lch2204,lch2318,lch2219,lch2459,lch5595,lch2215,lch2319,lch3298,lch3297,lch6517,lch6518,lch5701,lch6295,lch6559,lch5623,lch2375,lch2238,lch2247,lch5593,lch2303,lch2304,lch2770,lch2382,lch2328,lch2775,lch3952,lch2776,lch2813,lch2339,lch2341,lch2340,lch2342,lch2225,lch2227,lch2325,lch2228,lch6490,lch6491,lch6492,lch6496,lch6493,lch6494,lch6495,lch2333,lch2424,lch2796,lch2229,lch2322,lch2335,lch2336,lch2189,lch2224,lch6489,lch5602,lch2344,lch2273,lch2275,lch2343,lch2353,lch2327,lch2354,lch2278,lch2277,lch5703,lch3091,lch3489,lch2269,lch2359,lch2314,lch6620,lch6298,lch2285,lch2291,lch2287,lch7115,lch2491,lch2357,lch2188,lch2358,lch5625,lch6313`,
       programming,
       "PERU"
     );
     // API GUIA DE PROGRAMACION MOVISTAR COLOMBIA
     await this.#fetchProgrammingMovistar(
-      `https://contentapi-co.cdn.telefonica.com/33/default/es-CO/schedules?fields=Title,Description,ChannelName,CallLetter,Start,End,LiveChannelPid,images.videoFrame,images.banner&orderBy=START_TIME:a&filteravailability=false&starttime=${this.timeStart}&endtime=${this.timeEnd}&livechannelpids=lch5689,lch2713,lch2746,lch5676,lch2593,lch3912,lch2653,lch2738,lch3770,lch2692,lch2651,lch2632,lch3769,lch2571,lch3780,lch3772,lch2680,lch2655,lch2597,lch3927,lch3839,lch2822,lch5677,lch2734`,
+      `https://contentapi-co.cdn.telefonica.com/33/default/es-CO/schedules?fields=Title,Description,ChannelName,Start,End,LiveChannelPid,images.videoFrame&filteravailability=false&starttime=${this.timeStart}&endtime=${this.timeEnd}&livechannelpids=lch5689,lch2713,lch2746,lch5676,lch2593,lch3912,lch2653,lch2738,lch3770,lch2651,lch2632,lch3769,lch2571,lch3780,lch3772,lch2680,lch2655,lch2597,lch3927,lch2822,lch5677,lch2734`,
       programming,
       "COLOMBIA"
     );
     // API GUIA DE PROGRAMACION MOVISTAR ARGENTINA
     await this.#fetchProgrammingMovistar(
-      `https://contentapi-ar.cdn.telefonica.com/29/default/es-AR/schedules?fields=Title,Description,ChannelName,CallLetter,Start,End,LiveChannelPid,images.videoFrame,images.banner&orderBy=START_TIME:a&filteravailability=false&starttime=${this.timeStart}&endtime=${this.timeEnd}&livechannelpids=lch3358,lch3356,lch3178,lch3172,lch3268,lch3128,lch3440,lch3122,lch6466`,
+      `https://contentapi-ar.cdn.telefonica.com/29/default/es-AR/schedules?fields=Title,Description,ChannelName,Start,End,LiveChannelPid,images.videoFrame&filteravailability=false&starttime=${this.timeStart}&endtime=${this.timeEnd}&livechannelpids=lch3358,lch3356,lch3178,lch3172,lch3268,lch3128,lch3440,lch3122,lch3317,lch6466`,
       programming,
       "ARGENTINA"
     );
     // API GUIA DE PROGRAMACION MOVISTAR CHILE
     await this.#fetchProgrammingMovistar(
-      `https://contentapi-cl.cdn.telefonica.com/26/default/es-CL/schedules?fields=Title,Description,ChannelName,CallLetter,Start,End,LiveChannelPid,images.videoFrame,images.banner&orderBy=START_TIME:a&filteravailability=false&starttime=${this.timeStart}&endtime=${this.timeEnd}&livechannelpids=lch497,lch5542,lch4114,lch597,lch593,lch615,lch1281,lch639,lch624,lch621,lch630`,
+      `https://contentapi-cl.cdn.telefonica.com/26/default/es-CL/schedules?fields=Title,Description,ChannelName,Start,End,LiveChannelPid,images.videoFrame&filteravailability=false&starttime=${this.timeStart}&endtime=${this.timeEnd}&livechannelpids=lch497,lch5542,lch4114,lch593,lch615,lch1281,lch639,lch624,lch630`,
       programming,
       "CHILE"
     );
@@ -208,10 +208,17 @@ class EpgService {
         programming
       );
       await this.#fetchProgrammingMiTv(
+        "gt",
+        "hbo-oeste",
+        dateFormat,
+        "1571",
+        programming
+      );
+      await this.#fetchProgrammingMiTv(
         "mx",
         "hbo-2",
         dateFormat,
-        "1571",
+        "1572",
         programming
       );
       await this.#fetchProgrammingMiTv(
