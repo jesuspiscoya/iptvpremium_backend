@@ -16,6 +16,7 @@ class ChannelService {
       channel_id: channel[0].channel_id,
       name: channel[0].name,
       logo: channel[0].logo,
+      group: channel[0].group_title,
       url: channel[0].url,
       state: channel[0].state,
     };
@@ -32,6 +33,7 @@ class ChannelService {
         channel_id: channel.channel_id,
         name: channel.name,
         logo: channel.logo,
+        group: channel.group_title,
         state: channel.state,
       };
     });
@@ -44,8 +46,8 @@ class ChannelService {
 
     const header = "#EXTM3U\n";
     const body = channels
-      .map((channel) => {
-        return `#EXTINF:-1 tvg-id="${channel.channel_id}" tvg-name="${channel.name}" tvg-logo="${channel.logo}", ${channel.name}\n${channel.url}`;
+      .map(({ channel_id, name, logo, group_title, url }) => {
+        return `#EXTINF:-1 tvg-id="${channel_id}" tvg-name="${name}" tvg-logo="${logo}" group-title="${group_title}", ${name}\n${url}`;
       })
       .join("\n\n");
 

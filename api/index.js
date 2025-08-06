@@ -32,6 +32,14 @@ const errorServer = {
   message: "Ocurrió un error en el servidor.",
 };
 
+const verifyToken = (req, next) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  const payload = jwt.verify(token, SECRET);
+
+  if (Date.now() >= payload.exp)
+    next({ name: "JsonWebTokenError", message: "token expired" });
+};
+
 app.get("/", (req, res) => {
   res.json({
     message: "Hello world from Perú 🇵🇪!",
@@ -50,16 +58,7 @@ app.post("/api/login", async (req, res, next) => {
 
 app.get("/api/channels", async (req, res, next) => {
   try {
-    const token = req.headers.authorization?.split(" ")[1];
-    const payload = jwt.verify(token, SECRET);
-
-    if (Date.now() >= payload.exp)
-      next({ name: "JsonWebTokenError", message: "token expired" });
-  } catch (error) {
-    next(error);
-  }
-
-  try {
+    verifyToken(req, next);
     const channels = await new ChannelService().getChannels();
     res.status(200).json({ data: channels, metadata: success });
   } catch (error) {
@@ -69,16 +68,7 @@ app.get("/api/channels", async (req, res, next) => {
 
 app.get("/api/channel/:id", async (req, res, next) => {
   try {
-    const token = req.headers.authorization?.split(" ")[1];
-    const payload = jwt.verify(token, SECRET);
-
-    if (Date.now() >= payload.exp)
-      next({ name: "JsonWebTokenError", message: "token expired" });
-  } catch (error) {
-    next(error);
-  }
-
-  try {
+    verifyToken(req, next);
     const channel = await new ChannelService().getChannel(req.params.id);
     res.status(200).json({ data: channel, metadata: success });
   } catch (error) {
